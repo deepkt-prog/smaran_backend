@@ -1,0 +1,9 @@
+2026-01-04 20:17:47,417 - Processing reminders for target date: 2026-01-04
+2026-01-04 20:17:47,419 - Checking events for user: test@example.com
+2026-01-04 20:17:49,072 - Checking events for user: thakkerdeep1@gmail.com
+2026-01-04 20:17:49,878 - Checking events for user: notify_test@example.com
+2026-01-04 20:17:49,880 - [EMAIL] To: notify_test@example.com | Subject: Smaran Reminder: Test Notification Event is TODAY | Body: Namaste notify_test@example.com,
+
+This is a reminder that 'Test Notification Event' is falling on today, 2026-01-04.
+
+- Team Smaran

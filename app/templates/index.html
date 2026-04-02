@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smaran - Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FF9933;
+            --bg-color: #fdfbf7;
+            --text-color: #333;
+            --sidebar-width: 260px;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: white;
+            border-right: 1px solid #eee;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            text-align: center;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .logo {
+            height: 60px;
+            mix-blend-mode: multiply;
+        }
+
+        .nav-links {
+            padding: 1rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            text-decoration: none;
+            color: #555;
+            border-radius: 8px;
+            transition: all 0.2s;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background-color: #fff8f0;
+            color: #d35400;
+        }
+
+        .nav-item.active {
+            font-weight: 600;
+            background-color: #ffe0b2;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Top Bar Re-Design */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .top-right-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        /* Card & Utility Styles */
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+            flex: 1;
+            /* Push footer down */
+        }
+
+        h2,
+        h3 {
+            color: #d35400;
+            margin-top: 0;
+        }
+
+        /* Event Table Styles */
+        .event-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .event-table th {
+            text-align: left;
+            padding: 12px;
+            background: #ffe0b2;
+            color: #d35400;
+            font-weight: 600;
+            border-radius: 4px;
+        }
+
+        .event-table td {
+            padding: 12px;
+            border-bottom: 1px solid #f0f0f0;
+            vertical-align: top;
+        }
+
+        .event-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .desc-cell {
+            max-width: 300px;
+            white-space: normal;
+            word-wrap: break-word;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .action-cell {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Buttons */
+        button {
+            font-family: inherit;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .btn-icon {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        .btn-icon:hover {
+            background: #f0f0f0;
+        }
+
+        input,
+        select,
+        textarea {
+            font-family: inherit;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+
+        /* Notif Styles */
+        .notification-wrapper {
+            position: relative;
+            cursor: pointer;
+            font-size: 1.4rem;
+        }
+
+        .badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            font-size: 0.6rem;
+            padding: 2px 5px;
+            display: none;
+        }
+
+        .notif-dropdown {
+            position: absolute;
+            top: 30px;
+            right: 0;
+            background: white;
+            width: 300px;
+            border: 1px solid #eee;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            display: none;
+            z-index: 200;
+        }
+
+        .notif-header {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            font-weight: 600;
+            color: #d35400;
+        }
+
+        .notif-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .notif-item {
+            padding: 10px;
+            border-bottom: 1px solid #f9f9f9;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        /* Footer Styles */
+        .app-footer {
+            text-align: center;
+            margin-top: auto;
+            padding: 2rem 0;
+            border-top: 1px solid #eee;
+            color: #777;
+        }
+
+        .app-footer h4 {
+            margin: 0 0 10px 0;
+            font-weight: 500;
+            font-size: 1rem;
+            color: #555;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .social-link svg {
+            width: 24px;
+            height: 24px;
+            fill: #777;
+            transition: fill 0.2s;
+        }
+
+        .social-link:hover svg {
+            fill: #d35400;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 90;
+        }
+
+        .hamburger {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            margin-right: 15px;
+            color: #d35400;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: flex;
+                /* Always flex, just hidden via transform */
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .event-table {
+                display: block;
+                overflow-x: auto;
+            }
+
+            .hamburger {
+                display: block;
+            }
+
+            .top-bar {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+        }
+    </style>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => navigator.serviceWorker.register('/static/sw.js'));
+        }
+    </script>
+</head>
+
+<body>
+    <!-- Overlay for Mobile Sidebar -->
+    <div class="overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="app-sidebar">
+        <div class="sidebar-header">
+            <a href="/">
+                <img src="/static/Logo.png" alt="Smaran" class="logo">
+            </a>
+            <!-- Close btn for mobile -->
+            <button onclick="toggleSidebar()"
+                style="display:none; background:none; color:#333; position:absolute; right:10px; top:10px; font-size:1.2rem;"
+                class="mobile-close-btn">✕</button>
+        </div>
+
+        <nav class="nav-links">
+            <a href="/home" class="nav-item active" onclick="showTab('home', true); toggleSidebar(); return false;"
+                id="nav-home">
+                <span>🏠</span> Home
+            </a>
+            <a href="/calendar" class="nav-item">
+                <span>📅</span> Calendar View
+            </a>
+            {% if user %}
+            <a href="/scheduled-events" class="nav-item"
+                onclick="showTab('scheduled', true); toggleSidebar(); return false;" id="nav-scheduled">
+                <span>📋</span> Scheduled Events
+            </a>
+            {% if user.family_id %}
+            <a href="#" class="nav-item" onclick="showTab('family', true); toggleSidebar(); return false;"
+                id="nav-family">
+                <span>👨‍👩‍👧‍👦</span> Family Events
+            </a>
+            {% else %}
+            <a href="/auth/profile" class="nav-item" title="Create a Family Group">
+                <span>➕</span> Create Family
+            </a>
+            {% endif %}
+            {% endif %}
+        </nav>
+
+        <div class="sidebar-footer"></div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <!-- Left: Hamburger + Welcome -->
+            <div style="display: flex; align-items: center;">
+                <div class="hamburger" onclick="toggleSidebar()">☰</div>
+                {% if user %}
+                <h2 style="margin:0; font-size: 1.5rem; color: #d35400;">{{ t['welcome'] }}, {{ user.full_name or
+                    user.email }}</h2>
+                {% endif %}
+            </div>
+
+            <!-- Right: Lang, Profile, Notif -->
+            <div class="top-right-actions">
+                <!-- Language Switcher -->
+                <form action="/auth/set-language" method="post" style="margin: 0;">
+                    <select name="language" onchange="this.form.submit()" style="padding: 5px; font-size: 0.85rem;">
+                        <option value="en" {% if current_lang=='en' %}selected{% endif %}>English</option>
+                        <option value="hi" {% if current_lang=='hi' %}selected{% endif %}>हिन्दी</option>
+                        <option value="mr" {% if current_lang=='mr' %}selected{% endif %}>मराठी</option>
+                        <option value="gu" {% if current_lang=='gu' %}selected{% endif %}>ગુજરાતી</option>
+                    </select>
+                </form>
+
+                {% if user %}
+                <!-- Notification Bell -->
+                <div class="notification-wrapper" id="notif-bell" onclick="toggleNotifications()">
+                    🔔
+                    <span class="badge" id="notif-badge">0</span>
+                    <div class="notif-dropdown" id="notif-dropdown" onclick="event.stopPropagation()">
+                        <div class="notif-header">Notifications</div>
+                        <ul class="notif-list" id="notif-list">
+                            <li class="notif-item">No new notifications</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Profile -->
+                <a href="/auth/profile"
+                    style="text-decoration:none; color: #333; display: flex; align-items: center; gap: 8px; font-weight: 500;">
+                    <span
+                        style="background: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid #d35400; color: #d35400;">👤</span>
+                    <span>{{ user.full_name or 'Profile' }}</span>
+                </a>
+
+                <form action="/auth/logout" method="post" style="margin:0;">
+                    <button type="submit"
+                        style="padding: 6px 12px; font-size: 0.85rem; background: #eee; color: #d35400; border: 1px solid #d35400;">Logout</button>
+                </form>
+                {% else %}
+                <a href="/auth/login" style="color: #d35400; font-weight: 600;">Login</a>
+                <a href="/auth/signup"><button>Sign Up</button></a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card">
+            {% if user %}
+            <!-- VIEW: HOME -->
+            <div id="view-home">
+
+                <!-- UPCOMING EVENTS (NEXT 30 DAYS) -->
+                <h3 style="margin-top: 2rem; color: #d35400;">Your scheduled Smaran events for next 30 days.</h3>
+
+                {% if upcoming_events %}
+                <table class="event-table">
+                    <thead>
+                        <tr>
+                            <th>Event Name</th>
+                            <th>Tithi</th>
+                            <th>Next Date</th>
+                            <th>Description</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for event in upcoming_events %}
+                        <tr>
+                            <td style="font-weight: 500;">
+                                {{ event.name }}
+                                {% if 'Shraddh' in event.name %}
+                                <div style="margin-top:5px;">
+                                    <button onclick="alert('Module Coming Soon: Book a Pandit for Shraddh')"
+                                        style="background: #e67e22; font-size: 0.7rem; padding: 2px 6px;">🤲 Book
+                                        Brahman</button>
+                                </div>
+                                {% elif 'Ekadashi' in event.name %}
+                                <div style="margin-top:5px;">
+                                    <button onclick="alert('Module Coming Soon: View Vrat Recipes')"
+                                        style="background: #27ae60; font-size: 0.7rem; padding: 2px 6px;">🥗 Vrat
+                                        Recipes</button>
+                                </div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% for en_masa, loc_masa in t['masas'] %}
+                                {% if en_masa == event.masa %}{{ loc_masa }}{% endif %}
+                                {% endfor %}
+                                {{ t['pakshas'][event.paksha] }} {{ event.tithi }}
+                            </td>
+                            <td style="color: #d35400; font-weight: 600;">{{ event.next_date }}</td>
+                            <td class="desc-cell">{{ event.description or '-' }}</td>
+                            <td class="action-cell">
+                                <!-- <button class="btn-icon" title="Memories"
+                                    onclick="openMemoryModal({{ event.id }}, '{{ event.name }}')">🕯️</button> -->
+                                <button class="btn-icon" title="Edit" data-id="{{ event.id }}"
+                                    data-name="{{ event.name }}" data-masa="{{ event.masa }}"
+                                    data-paksha="{{ event.paksha }}" data-tithi="{{ event.tithi }}"
+                                    data-desc="{{ event.description }}" data-rec="{{ event.recurrence_type }}"
+                                    onclick="openEditModal(this)">✏️</button>
+                                <button class="btn-icon" title="Delete" style="color: #c62828;" data-id="{{ event.id }}"
+                                    onclick="deleteEvent(this)">🗑️</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p style="color: #666; font-style: italic; margin-top: 10px;">
+                    No upcoming events in next 30 days.
+                    <a href="#" onclick="showTab('scheduled'); return false;"
+                        style="color:#d35400; text-decoration: underline;">View all events</a>
+                </p>
+                {% endif %}
+
+                <hr style="margin: 3rem 0; border: 0; border-top: 1px solid #eee;">
+
+                <h3>{{ t['add_new_event'] }}</h3>
+
+                <!-- Helper Tool -->
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <label style="font-size: 0.9rem; font-weight: 500; color: #555;">Tool: Find Tithi from Date</label>
+                    <div style="display: flex; gap: 10px; margin-top: 5px;">
+                        <input type="date" id="helper_date" style="flex:1;">
+                        <button type="button" onclick="autofillTithi()" style="background: #666;">Get Tithi</button>
+                    </div>
+                </div>
+
+                <form onsubmit="addEvent(event)">
+                    <input type="hidden" id="user_lat" value="{{ user.latitude }}">
+                    <input type="hidden" id="user_lon" value="{{ user.longitude }}">
+
+                    <div class="form-grid"
+                        style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <input type="text" id="event_name" placeholder="{{ t['event_name_placeholder'] }}" required
+                            style="grid-column: span 2;">
+
+                        <select id="event_masa" required>
+                            <option value="" disabled selected>Select Masa</option>
+                            {% for en, loc in t['masas'] %}
+                            <option value="{{ en }}">{{ loc }}</option>
+                            {% endfor %}
+                        </select>
+                        <select id="event_paksha" required>
+                            <option value="" disabled selected>Select Paksha</option>
+                            <option value="Shukla">{{ t['pakshas']['Shukla'] }}</option>
+                            <option value="Krishna">{{ t['pakshas']['Krishna'] }}</option>
+                        </select>
+                        <input type="number" id="event_tithi" placeholder="{{ t.get('tithi_label', 'Tithi') }} (1-15)"
+                            max="15" min="1" required>
+                        <select id="event_recurrence" onchange="toggleMasaVisibility()">
+                            <option value="yearly">Yearly</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="paksha">Every 15 Days (Paksha)</option>
+                        </select>
+                    </div>
+                    <textarea id="event_description" placeholder="Description (Optional)"
+                        style="width: 100%; margin-bottom: 15px; box-sizing: border-box;"></textarea>
+
+                    <button type="submit" style="width: 100%;">{{ t['add_event_btn'] }}</button>
+                </form>
+                <div id="add_result" style="margin-top: 10px; font-weight: bold;"></div>
+            </div>
+
+            <!-- VIEW: SCHEDULED EVENTS -->
+            <div id="view-scheduled" style="display: none;">
+                <h3 id="scheduled-events">{{ t['scheduled_events'] }}</h3>
+                <p style="color: #666; font-size: 0.9rem;">List of all your recurring events.</p>
+
+                {% if events %}
+                <table class="event-table">
+                    <thead>
+                        <tr>
+                            <th>Event Name</th>
+                            <th>Tithi</th>
+                            <th>Next Date</th>
+                            <th>Description</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for event in events %}
+                        <tr>
+                            <td style="font-weight: 500;">{{ event.name }}</td>
+                            <td>
+                                {% for en_masa, loc_masa in t['masas'] %}
+                                {% if en_masa == event.masa %}{{ loc_masa }}{% endif %}
+                                {% endfor %}
+                                {{ t['pakshas'][event.paksha] }} {{ event.tithi }}
+                            </td>
+                            <td>
+                                {% if event.next_date %}
+                                {{ event.next_date }}
+                                {% else %}
+                                <span style="color: #999;">({{ t.get('pending', 'Pending') }})</span>
+                                {% endif %}
+                            </td>
+                            <td class="desc-cell">{{ event.description or '-' }}</td>
+                            <td class="action-cell">
+                                <!-- <button class="btn-icon" title="Memories"
+                                    onclick="openMemoryModal({{ event.id }}, '{{ event.name }}')">🕯️</button> -->
+                                <button class="btn-icon" title="Edit" data-id="{{ event.id }}"
+                                    data-name="{{ event.name }}" data-masa="{{ event.masa }}"
+                                    data-paksha="{{ event.paksha }}" data-tithi="{{ event.tithi }}"
+                                    data-desc="{{ event.description }}" data-rec="{{ event.recurrence_type }}"
+                                    onclick="openEditModal(this)">✏️</button>
+                                <button class="btn-icon" title="Delete" style="color: #c62828;" data-id="{{ event.id }}"
+                                    onclick="deleteEvent(this)">🗑️</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p>{{ t['no_events'] }}</p>
+                {% endif %}
+            </div>
+
+            <!-- VIEW: FAMILY EVENTS (New) -->
+            <div id="view-family" style="display: none;">
+                <h3>👨‍👩‍👧‍👦 Family Events</h3>
+                <p style="color: #666; font-size: 0.9rem;">Events tracked by your family members.</p>
+
+                <div id="family-events-loader" style="display:none; text-align:center; padding: 20px;">
+                    Loading Family Data...
+                </div>
+
+                <div id="family-events-container"></div>
+            </div>
+
+            {% else %}
+            <div style="text-align: center; padding: 2rem;">
+                <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">Smaran</h1>
+                <p style="font-size: 1.2rem; color: #666; margin-bottom: 2rem;">Authentic Tithi tracking, tailored to
+                    your location.</p>
+                <p>Please login to see your dashboard.</p>
+            </div>
+            {% endif %}
+
+            {% if not user %}
+            <!-- Guest Calculator Tools -->
+            <hr style="margin: 3rem 0; border: 0; border-top: 1px solid #eee;">
+            <h3>Quick Tithi Calculator</h3>
+            <form action="/events/calculate-date" method="post" onsubmit="calculateDate(event)">
+                <input type="number" id="year" value="2025" placeholder="Year">
+                <select id="masa">
+                    {% for en, loc in t['masas'] %}
+                    <option value="{{ en }}">{{ loc }}</option>
+                    {% endfor %}
+                </select>
+                <select id="paksha">
+                    <option value="Shukla">{{ t['pakshas']['Shukla'] }}</option>
+                    <option value="Krishna">{{ t['pakshas']['Krishna'] }}</option>
+                </select>
+                <input type="number" id="tithi" placeholder="{{ t.get('tithi_label', 'Tithi') }} (1-15)" max="15"
+                    min="1">
+                <br><br>
+                <input type="text" id="lat" value="19.0760" placeholder="Lat" readonly style="background:#f0f0f0;">
+                <input type="text" id="lon" value="72.8777" placeholder="Lon" readonly style="background:#f0f0f0;">
+
+                <button type="submit" style="margin-top: 10px;">{{ t['calc_date_btn'] }}</button>
+            </form>
+            <p id="result"></p>
+            {% endif %}
+        </div>
+
+        <footer class="app-footer">
+            <h4>Contact Developer: Deep Thakker</h4>
+            <div class="social-links">
+                <!-- Email Icon -->
+                <a href="mailto:thakkerdeep1@gmail.com?subject=Smaran%20Feedback" class="social-link" title="Email Me">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+                    </svg>
+                </a>
+                <!-- LinkedIn Icon -->
+                <a href="https://www.linkedin.com/in/dthakker25/" target="_blank" class="social-link" title="LinkedIn">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                    </svg>
+                </a>
+            </div>
+        </footer>
+    </main>
+
+    <!-- Edit Modal -->
+    <div id="editModal"
+        style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+        <div style="background: white; padding: 2rem; border-radius: 12px; width: 90%; max-width: 450px;">
+            <h3>Edit Event</h3>
+            <form onsubmit="updateEvent(event)">
+                <input type="hidden" id="edit_event_id">
+                <input type="text" id="edit_event_name" placeholder="Name" required
+                    style="width: 100%; margin-bottom: 10px; box-sizing: border-box;">
+
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <select id="edit_event_masa" required style="flex:1">
+                        {% for en, loc in t['masas'] %}
+                        <option value="{{ en }}">{{ loc }}</option>
+                        {% endfor %}
+                    </select>
+                    <select id="edit_event_paksha" required style="flex:1">
+                        <option value="Shukla">Shukla</option>
+                        <option value="Krishna">Krishna</option>
+                    </select>
+                    <input type="number" id="edit_event_tithi" style="width: 60px;" required>
+                </div>
+                <textarea id="edit_event_description" placeholder="Add Description"
+                    style="width: 100%; margin-bottom: 15px; box-sizing: border-box;"></textarea>
+
+                <div style="margin-bottom: 15px;">
+                    <select id="edit_event_recurrence" style="width: 100%;">
+                        <option value="yearly">Yearly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="paksha">Every 15 Days (Paksha)</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" onclick="document.getElementById('editModal').style.display='none'"
+                        style="background: #ddd; color: #333;">Cancel</button>
+                    <button type="submit">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Memory Modal (Digital Shrine) -->
+    <div id="memoryModal"
+        style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1100; justify-content: center; align-items: center;">
+        <div
+            style="background: white; padding: 2rem; border-radius: 12px; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto;">
+            <h3 style="margin-top:0;">🕯️ Digital Shrine</h3>
+            <h4 id="mem_event_name" style="color: #d35400; margin-top: -10px;">Event Name</h4>
+
+            <div id="memories-container" style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
+                <!-- Content injected via JS -->
+                <p>Loading memories...</p>
+            </div>
+
+            <hr>
+
+            <h4>Add New Memory</h4>
+            <form id="memoryForm" onsubmit="uploadMemory(event)" enctype="multipart/form-data">
+                <input type="hidden" id="mem_event_id" name="event_id">
+                <input type="file" id="mem_file" name="file" accept="image/*" required style="margin-bottom: 10px;">
+                <input type="text" id="mem_caption" name="caption" placeholder="Caption/Note"
+                    style="width: 100%; margin-bottom: 10px;">
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" onclick="document.getElementById('memoryModal').style.display='none'"
+                        style="background: #ddd; color: #333;">Close</button>
+                    <button type="submit">Upload Memory</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <style>
+        @media (max-width: 768px) {
+            .mobile-close-btn {
+                display: block !important;
+            }
+        }
+    </style>
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('app-sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            if (sidebar) sidebar.classList.toggle('active');
+            if (overlay) overlay.style.display = (overlay.style.display === 'block' ? 'none' : 'block');
+        }
+
+        // Routing Logic
+        function showTab(tabName, pushState = true) {
+            const homeView = document.getElementById('view-home');
+            const schedView = document.getElementById('view-scheduled');
+            const familyView = document.getElementById('view-family');
+
+            const navHome = document.getElementById('nav-home');
+            const navSched = document.getElementById('nav-scheduled');
+            const navFamily = document.getElementById('nav-family');
+
+            // Allow nulls if sections don't exist (e.g. not logged in)
+            if (!homeView) return;
+
+            // Hide All
+            homeView.style.display = 'none';
+            if (schedView) schedView.style.display = 'none';
+            if (familyView) familyView.style.display = 'none';
+
+            // Deactivate Navs
+            if (navHome) navHome.classList.remove('active');
+            if (navSched) navSched.classList.remove('active');
+            if (navFamily) navFamily.classList.remove('active');
+
+            // Show Target
+            if (tabName === 'home') {
+                homeView.style.display = 'block';
+                if (navHome) navHome.classList.add('active');
+                if (pushState) history.pushState({ tab: 'home' }, '', '/home');
+            } else if (tabName === 'scheduled') {
+                if (schedView) schedView.style.display = 'block';
+                if (navSched) navSched.classList.add('active');
+                if (pushState) history.pushState({ tab: 'scheduled' }, '', '/scheduled-events');
+            } else if (tabName === 'family') {
+                if (familyView) familyView.style.display = 'block';
+                if (navFamily) navFamily.classList.add('active');
+                if (pushState) history.pushState({ tab: 'family' }, '', '/family-events');
+                fetchFamilyEvents();
+            }
+        }
+
+        // ... (fetchFamilyEvents and openMemoryModal are below) ...
+
+
+        // ... (Update other functions similarly if needed)
+
+
+        async function fetchFamilyEvents() {
+            const container = document.getElementById('family-events-container');
+            if (!container) return;
+
+            container.innerHTML = '<p>Loading...</p>';
+
+            try {
+                const res = await fetch('/events/family');
+                if (!res.ok) throw new Error("Failed to load");
+                const events = await res.json();
+
+                if (events.length === 0) {
+                    container.innerHTML = '<p>No family events found.</p>';
+                } else {
+                    let html = '<table class="event-table"><thead><tr><th>Event</th><th>Tithi</th><th>Next Date</th><th>Actions</th></tr></thead><tbody>';
+                    events.forEach(ev => {
+                        html += `<tr>
+                            <td>${ev.name}</td>
+                            <td>${ev.masa} ${ev.paksha} ${ev.tithi}</td>
+                            <td>${ev.next_date || 'Pending'}</td>
+                            <td>
+                                <!-- <button class="btn-icon" title="View Memories" onclick="openMemoryModal(${ev.id}, '${ev.name}')">🕯️</button> -->
+                            </td>
+                         </tr>`;
+                    });
+                    html += '</tbody></table>';
+                    container.innerHTML = html;
+                }
+            } catch (e) {
+                container.innerHTML = '<p style="color:red">Error loading family events.</p>';
+            }
+        }
+
+        // Memory Modal Logic
+        async function openMemoryModal(eventId, eventName) {
+            const modal = document.getElementById('memoryModal');
+            document.getElementById('mem_event_id').value = eventId;
+            document.getElementById('mem_event_name').innerText = eventName;
+
+            const cont = document.getElementById('memories-container');
+            cont.innerHTML = '<p>Loading...</p>';
+            modal.style.display = 'flex';
+
+            try {
+                const res = await fetch(`/events/${eventId}/memories`);
+                const memories = await res.json();
+
+                cont.innerHTML = '';
+                if (memories.length === 0) {
+                    cont.innerHTML = '<p style="font-style:italic; color:#777;">No memories yet. Add a photo or note.</p>';
+                } else {
+                    memories.forEach(m => {
+                        const div = document.createElement('div');
+                        div.style.background = '#f9f9f9';
+                        div.style.padding = '10px';
+                        div.style.borderRadius = '8px';
+
+                        let content = '';
+                        if (m.media_url) {
+                            content += `<img src="${m.media_url}" style="max-width:100%; border-radius:4px; display:block; margin-bottom:5px;">`;
+                        }
+                        if (m.caption) {
+                            content += `<p style="margin:0; font-size:0.9rem;">${m.caption}</p>`;
+                        }
+                        div.innerHTML = content;
+                        cont.appendChild(div);
+                    });
+                }
+            } catch (e) {
+                console.error(e);
+                cont.innerHTML = '<p>Error.</p>';
+            }
+        }
+
+        async function uploadMemory(e) {
+            e.preventDefault();
+            const form = document.getElementById('memoryForm');
+            const data = new FormData(form);
+            const id = document.getElementById('mem_event_id').value;
+
+            try {
+                const res = await fetch(`/events/${id}/memory`, {
+                    method: 'POST',
+                    body: data
+                });
+                if (res.ok) {
+                    // Reload memories
+                    const eventName = document.getElementById('mem_event_name').innerText;
+                    openMemoryModal(id, eventName);
+                    form.reset();
+                } else {
+                    alert('Upload failed');
+                }
+            } catch (err) { alert('Error uploading'); }
+        }
+
+        // Handle Back/Forward Browser Buttons
+        window.onpopstate = function (event) {
+            if (event.state && event.state.tab) {
+                showTab(event.state.tab, false);
+            } else {
+                // Default based on path if state is null
+                handleInitialLoad();
+            }
+        };
+
+        // Handle Initial Load
+        function handleInitialLoad() {
+            const path = window.location.pathname;
+            if (path === '/scheduled-events' || window.location.hash === '#scheduled-events') {
+                showTab('scheduled', false);
+            } else if (path === '/family-events') {
+                showTab('family', false);
+            } else {
+                showTab('home', false);
+            }
+        }
+
+        window.addEventListener('load', handleInitialLoad);
+
+        // Notification Logic
+        const bell = document.getElementById('notif-bell');
+        const badge = document.getElementById('notif-badge');
+        const list = document.getElementById('notif-list');
+        const dropdown = document.getElementById('notif-dropdown');
+        let isDropdownOpen = false;
+
+        async function fetchNotifications() {
+            if (!bell) return;
+            try {
+                const response = await fetch('/notifications/');
+                if (response.ok) {
+                    const notifs = await response.json();
+                    updateNotificationUI(notifs);
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function updateNotificationUI(notifs) {
+            if (!badge || !list) return;
+            const unread = notifs.filter(n => !n.is_read).length;
+            if (unread > 0) { badge.innerText = unread; badge.style.display = 'block'; }
+            else { badge.style.display = 'none'; }
+
+            list.innerHTML = '';
+            if (notifs.length === 0) list.innerHTML = '<li class="notif-item">No notifications</li>';
+            else {
+                notifs.forEach(n => {
+                    const li = document.createElement('li');
+                    li.className = `notif-item ${n.is_read ? '' : 'unread'}`;
+                    li.innerText = n.message;
+                    li.onclick = async () => {
+                        await fetch(`/notifications/${n.id}/read`, { method: 'POST' });
+                        fetchNotifications();
+                    };
+                    list.appendChild(li);
+                });
+            }
+        }
+
+        function toggleNotifications() {
+            isDropdownOpen = !isDropdownOpen;
+            if (dropdown) dropdown.style.display = isDropdownOpen ? 'block' : 'none';
+            if (isDropdownOpen) fetchNotifications();
+        }
+
+        window.onclick = (e) => {
+            if (dropdown && !bell.contains(e.target)) {
+                isDropdownOpen = false;
+                dropdown.style.display = 'none';
+            }
+        }
+
+        if (bell) { fetchNotifications(); setInterval(fetchNotifications, 60000); }
+
+        async function addEvent(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            const origText = btn.innerText;
+            btn.innerText = "Saving...";
+            btn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('name', document.getElementById('event_name').value);
+            formData.append('tithi', document.getElementById('event_tithi').value);
+            formData.append('masa', document.getElementById('event_masa').value);
+            formData.append('paksha', document.getElementById('event_paksha').value);
+            formData.append('recurrence_type', document.getElementById('event_recurrence').value);
+            formData.append('description', document.getElementById('event_description').value);
+
+            try {
+                const res = await fetch('/events/', { method: 'POST', body: formData });
+                if (res.ok) {
+                    alert("Event Saved Successfully!");
+                    location.reload();
+                } else {
+                    alert("Failed to save event.");
+                    btn.innerText = origText;
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                alert("Error: " + err);
+                btn.innerText = origText;
+                btn.disabled = false;
+            }
+        }
+
+        async function updateEvent(e) {
+            e.preventDefault();
+            const id = document.getElementById('edit_event_id').value;
+            const data = {
+                name: document.getElementById('edit_event_name').value,
+                masa: document.getElementById('edit_event_masa').value,
+                paksha: document.getElementById('edit_event_paksha').value,
+                tithi: parseInt(document.getElementById('edit_event_tithi').value),
+                description: document.getElementById('edit_event_description').value,
+                recurrence_type: document.getElementById('edit_event_recurrence').value
+            };
+            const res = await fetch(`/events/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if (res.ok) location.reload();
+            else alert("Failed");
+        }
+
+        async function deleteEvent(btn) {
+            if (!confirm("Delete?")) return;
+            const id = btn.getAttribute('data-id');
+            const res = await fetch(`/events/${id}`, { method: 'DELETE' });
+            if (res.ok) location.reload();
+        }
+
+        function openEditModal(btn) {
+            document.getElementById('edit_event_id').value = btn.getAttribute('data-id');
+            document.getElementById('edit_event_name').value = btn.getAttribute('data-name');
+            document.getElementById('edit_event_masa').value = btn.getAttribute('data-masa');
+            document.getElementById('edit_event_paksha').value = btn.getAttribute('data-paksha');
+            document.getElementById('edit_event_tithi').value = btn.getAttribute('data-tithi');
+
+            // Clean Description Logic
+            let desc = btn.getAttribute('data-desc');
+            if (!desc || desc === 'None') desc = "";
+            document.getElementById('edit_event_description').value = desc;
+
+            let rec = btn.getAttribute('data-rec');
+            if (!rec || rec === 'None') rec = "yearly";
+            document.getElementById('edit_event_recurrence').value = rec;
+
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        function autofillTithi() {
+            const dateStr = document.getElementById('helper_date').value;
+            if (!dateStr) return alert("Select date");
+            const lat = document.getElementById('user_lat').value;
+            const lon = document.getElementById('user_lon').value;
+
+            fetch('/events/reverse-calc', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ date: dateStr, latitude: parseFloat(lat), longitude: parseFloat(lon) })
+            }).then(r => r.json()).then(data => {
+                document.getElementById('event_masa').value = data.masa;
+                document.getElementById('event_paksha').value = data.paksha;
+                document.getElementById('event_tithi').value = data.tithi;
+            });
+        }
+
+        function toggleMasaVisibility() {
+            const rec = document.getElementById('event_recurrence').value;
+            const masa = document.getElementById('event_masa');
+            if (rec === 'monthly' || rec === 'paksha') masa.style.display = 'none';
+            else masa.style.display = 'inline-block';
+        }
+
+        // --- Guest Calculator Functions ---
+        async function calculateDate(e) {
+            e.preventDefault();
+            const data = {
+                year: parseInt(document.getElementById('year').value),
+                masa: document.getElementById('masa').value,
+                paksha: document.getElementById('paksha').value,
+                tithi: parseInt(document.getElementById('tithi').value),
+                latitude: parseFloat(document.getElementById('lat').value),
+                longitude: parseFloat(document.getElementById('lon').value)
+            };
+
+            const response = await fetch('/events/calculate-date', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                const date = await response.json();
+                document.getElementById('result').innerText = "Calculated Date: " + date;
+            } else {
+                document.getElementById('result').innerText = "Error calculating date.";
+            }
+        }
+    </script>
+</body>
+
+</html>

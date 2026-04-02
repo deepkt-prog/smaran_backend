@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smaran - Calendar</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FF9933;
+            --bg-color: #fdfbf7;
+            --text-color: #333;
+            --sidebar-width: 260px;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        button,
+        input,
+        select,
+        textarea {
+            font-family: inherit;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: white;
+            border-right: 1px solid #eee;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            text-align: center;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .logo {
+            height: 60px;
+            mix-blend-mode: multiply;
+        }
+
+        .nav-links {
+            padding: 1rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            text-decoration: none;
+            color: #555;
+            border-radius: 8px;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background-color: #fff8f0;
+            color: #d35400;
+        }
+
+        .nav-item.active {
+            font-weight: 600;
+            background-color: #ffe0b2;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Top Bar Re-Design */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .top-right-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        /* Notif Styles */
+        .notification-wrapper {
+            position: relative;
+            cursor: pointer;
+            font-size: 1.4rem;
+        }
+
+        .badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            font-size: 0.6rem;
+            padding: 2px 5px;
+            display: none;
+        }
+
+        .notif-dropdown {
+            position: absolute;
+            top: 30px;
+            right: 0;
+            background: white;
+            width: 300px;
+            border: 1px solid #eee;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            display: none;
+            z-index: 200;
+        }
+
+        .notif-header {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            font-weight: 600;
+            color: #d35400;
+        }
+
+        .notif-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .notif-item {
+            padding: 10px;
+            border-bottom: 1px solid #f9f9f9;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        /* Calendar Specifics */
+        .calendar-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            flex: 1;
+            /* Push footer down */
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .month-year {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #d35400;
+        }
+
+        .nav-btn {
+            background: none;
+            border: 1px solid #d35400;
+            color: #d35400;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .nav-btn:hover {
+            background: #ffeeba;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+
+        .day-name {
+            text-align: center;
+            font-weight: bold;
+            padding: 10px;
+            background: #ffeeba;
+            border-radius: 4px;
+        }
+
+        .day-cell {
+            min-height: 100px;
+            border: 1px solid #eee;
+            padding: 5px;
+            border-radius: 4px;
+            background: #fff;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .day-cell:hover {
+            background: #fafafa;
+        }
+
+        .day-cell.today {
+            border: 2px solid var(--primary);
+            background: #fff8f0;
+        }
+
+        .day-number {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        .event-badge {
+            background: #FFE0B2;
+            color: #E65100;
+            font-size: 0.75rem;
+            padding: 2px 4px;
+            border-radius: 3px;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: #d35400;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-secondary {
+            background: #ddd;
+            color: #333;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* Footer Styles */
+        .app-footer {
+            text-align: center;
+            margin-top: auto;
+            padding: 2rem 0;
+            border-top: 1px solid #eee;
+            color: #777;
+        }
+
+        .app-footer h4 {
+            margin: 0 0 10px 0;
+            font-weight: 500;
+            font-size: 1rem;
+            color: #555;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .social-link svg {
+            width: 24px;
+            height: 24px;
+            fill: #777;
+            transition: fill 0.2s;
+        }
+
+        .social-link:hover svg {
+            fill: #d35400;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+        }
+    </style>
+    <script>
+        if ('serviceWorker' in navigator) navigator.serviceWorker.register('/static/sw.js');
+    </script>
+</head>
+
+<body>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <a href="/">
+                <img src="/static/Logo.png" alt="Smaran" class="logo">
+            </a>
+        </div>
+
+        <nav class="nav-links">
+            <!-- Navigate to Dashboard Home -->
+            <a href="/" class="nav-item">
+                <span>🏠</span> Home
+            </a>
+            <a href="/calendar" class="nav-item active">
+                <span>📅</span> Calendar View
+            </a>
+            {% if user %}
+            <!-- Navigate to Dashboard Scheduled Tab -->
+            <a href="/#scheduled-events" class="nav-item">
+                <span>📋</span> Scheduled Events
+            </a>
+            {% endif %}
+        </nav>
+
+        <div class="sidebar-footer"></div>
+    </aside>
+
+    <main class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <!-- Left: Welcome Message -->
+            <div>
+                {% if user %}
+                <h2 style="margin:0; font-size: 1.5rem; color: #d35400;">{{ t['welcome'] }}, {{ user.full_name or
+                    user.email }}</h2>
+                {% endif %}
+            </div>
+
+            <!-- Right: Lang, Profile, Notif -->
+            <div class="top-right-actions">
+                <!-- Language Switcher -->
+                <form action="/auth/set-language" method="post" style="margin: 0;">
+                    <select name="language" onchange="this.form.submit()" style="padding: 5px; font-size: 0.85rem;">
+                        <option value="en" {% if current_lang=='en' %}selected{% endif %}>English</option>
+                        <option value="hi" {% if current_lang=='hi' %}selected{% endif %}>हिन्दी</option>
+                        <option value="mr" {% if current_lang=='mr' %}selected{% endif %}>मराठी</option>
+                        <option value="gu" {% if current_lang=='gu' %}selected{% endif %}>ગુજરાતી</option>
+                    </select>
+                </form>
+
+                {% if user %}
+                <!-- Notification Bell -->
+                <div class="notification-wrapper" id="notif-bell" onclick="toggleNotifications()">
+                    🔔
+                    <span class="badge" id="notif-badge">0</span>
+                    <div class="notif-dropdown" id="notif-dropdown" onclick="event.stopPropagation()">
+                        <div class="notif-header">Notifications</div>
+                        <ul class="notif-list" id="notif-list">
+                            <li class="notif-item">No new notifications</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Profile -->
+                <a href="/auth/profile"
+                    style="text-decoration:none; color: #333; display: flex; align-items: center; gap: 8px; font-weight: 500;">
+                    <span
+                        style="background: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid #d35400; color: #d35400;">👤</span>
+                    <span>{{ user.full_name or 'Profile' }}</span>
+                </a>
+
+                <form action="/auth/logout" method="post" style="margin:0;">
+                    <button type="submit"
+                        style="padding: 6px 12px; font-size: 0.85rem; background: #eee; color: #d35400; border: 1px solid #d35400;">Logout</button>
+                </form>
+                {% else %}
+                <a href="/auth/login" style="color: #d35400; font-weight: 600;">Login</a>
+                <a href="/auth/signup"><button>Sign Up</button></a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="calendar-card">
+            <div class="calendar-header">
+                <button class="nav-btn" onclick="prevMonth()">&lt; Prev</button>
+                <span class="month-year" id="monthDisplay"></span>
+                <button class="nav-btn" onclick="nextMonth()">Next &gt;</button>
+            </div>
+
+            <div class="calendar-grid" id="calendarGrid">
+                <!-- Javascript will populate this -->
+            </div>
+        </div>
+
+        <footer class="app-footer">
+            <h4>Contact Developer: Deep Thakker</h4>
+            <div class="social-links">
+                <!-- Email Icon -->
+                <a href="mailto:thakkerdeep1@gmail.com?subject=Smaran%20Feedback" class="social-link" title="Email Me">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+                    </svg>
+                </a>
+                <!-- LinkedIn Icon -->
+                <a href="https://www.linkedin.com/in/dthakker25/" target="_blank" class="social-link" title="LinkedIn">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                    </svg>
+                </a>
+            </div>
+        </footer>
+    </main>
+
+    <!-- Add Event Modal -->
+    <div id="addEventModal" class="modal">
+        <div class="modal-content">
+            <h3>Add Event</h3>
+            <p id="selectedDateDisplay" style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;"></p>
+            <form id="addEventForm" onsubmit="saveNewEvent(event)">
+                <input type="hidden" name="tithi" id="add_tithi">
+                <input type="hidden" name="masa" id="add_masa">
+                <input type="hidden" name="paksha" id="add_paksha">
+
+                <div class="form-group">
+                    <label>Event Name</label>
+                    <input type="text" name="name" id="add_name" required placeholder="e.g. Mom's Birthday">
+                </div>
+
+                <div class="form-group">
+                    <label>Tithi (Calculated)</label>
+                    <input type="text" id="tithi_display" disabled style="background: #eee;">
+                    <small style="color: #d35400;">Calculated from the date you clicked.</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Recurrence</label>
+                    <select name="recurrence_type" id="add_recurrence">
+                        <option value="yearly">Yearly (Every Year on this Tithi)</option>
+                        <option value="monthly">Monthly (Every Month on this Tithi)</option>
+                        <option value="paksha">Every 15 Days (Paksha)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" id="add_description" placeholder="Add Description"></textarea>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px;">
+                    <button type="button" class="btn-secondary" onclick="closeModal('addEventModal')">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Event</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Event Modal -->
+    <div id="editEventModal" class="modal">
+        <div class="modal-content">
+            <h3>Edit Event</h3>
+            <form id="editEventForm" onsubmit="event.preventDefault(); updateEvent();">
+                <input type="hidden" id="edit_event_id">
+
+                <div class="form-group">
+                    <label>Event Name</label>
+                    <input type="text" id="edit_name" name="name" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Recurrence</label>
+                    <select id="edit_recurrence" name="recurrence_type">
+                        <option value="yearly">Yearly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="paksha">Every 15 Days (Paksha)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="edit_description" name="description" placeholder="Add Description"></textarea>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; margin-top: 15px;">
+                    <button type="button" class="btn-danger" onclick="deleteEvent()">Delete</button>
+                    <div style="display: flex; gap: 10px;">
+                        <button type="button" class="btn-secondary"
+                            onclick="closeModal('editEventModal')">Cancel</button>
+                        <button type="submit" class="btn-primary">Update</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script id="page-data" type="application/json">
+        {
+            "events": {{ events | tojson | safe }},
+            "user_lat": {{ user.latitude | tojson }},
+            "user_lon": {{ user.longitude | tojson }}
+        }
+    </script>
+    <script>
+        const pageData = JSON.parse(document.getElementById('page-data').textContent);
+        const rawEvents = pageData.events;
+        const userLat = pageData.user_lat;
+        const userLon = pageData.user_lon;
+
+        let currentDate = new Date();
+
+        function renderCalendar() {
+            const monthDisplay = document.getElementById('monthDisplay');
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            monthDisplay.innerText = `${monthNames[month]} ${year}`;
+
+            // Day Names
+            const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+            days.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.classList.add('day-name');
+                dayHeader.innerText = day;
+                grid.appendChild(dayHeader);
+            });
+
+            const firstDayIndex = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            for (let i = 0; i < firstDayIndex; i++) {
+                const empty = document.createElement('div');
+                empty.classList.add('empty-cell');
+                grid.appendChild(empty);
+            }
+
+            const today = new Date();
+            for (let i = 1; i <= daysInMonth; i++) {
+                const cell = document.createElement('div');
+                cell.classList.add('day-cell');
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                cell.onclick = () => openAddModal(dateStr);
+
+                if (i === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+                    cell.classList.add('today');
+                }
+
+                const num = document.createElement('div');
+                num.classList.add('day-number');
+                num.innerText = i;
+                cell.appendChild(num);
+
+                const eventsToday = rawEvents.filter(e => e.next_date === dateStr);
+                eventsToday.forEach(e => {
+                    const badge = document.createElement('span');
+                    badge.classList.add('event-badge');
+                    badge.innerText = e.name;
+                    badge.title = e.name;
+                    badge.onclick = (ev) => {
+                        ev.stopPropagation();
+                        openEditModal(e);
+                    };
+                    cell.appendChild(badge);
+                });
+
+                grid.appendChild(cell);
+            }
+        }
+
+        function prevMonth() { currentDate.setMonth(currentDate.getMonth() - 1); renderCalendar(); }
+        function nextMonth() { currentDate.setMonth(currentDate.getMonth() + 1); renderCalendar(); }
+
+        async function openAddModal(dateStr) {
+            document.getElementById('addEventModal').style.display = 'flex';
+            document.getElementById('selectedDateDisplay').innerText = "Calculating Tithi for " + dateStr + "...";
+            document.getElementById('tithi_display').value = "Calculating...";
+            document.getElementById('add_name').value = "";
+            document.getElementById('add_description').value = ""; // Placeholder handles logic
+
+            try {
+                const resp = await fetch('/events/reverse-calc', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        date: dateStr,
+                        latitude: userLat,
+                        longitude: userLon
+                    })
+                });
+
+                if (!resp.ok) throw new Error("Calculation failed");
+                const data = await resp.json();
+
+                document.getElementById('selectedDateDisplay').innerText = `Adding event for ${dateStr}`;
+                document.getElementById('add_masa').value = data.masa;
+                document.getElementById('add_paksha').value = data.paksha;
+                document.getElementById('add_tithi').value = data.tithi;
+                document.getElementById('tithi_display').value = `${data.masa} ${data.paksha} ${data.tithi}`;
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('selectedDateDisplay').innerText = "Error calculating Tithi.";
+                document.getElementById('tithi_display').value = "Error";
+            }
+        }
+
+        function openEditModal(event) {
+            if (event.is_system) {
+                alert("Cannot edit system festivals.");
+                return;
+            }
+            document.getElementById('editEventModal').style.display = 'flex';
+            document.getElementById('edit_event_id').value = event.id;
+            document.getElementById('edit_name').value = event.name;
+
+            // Description Logic
+            let desc = event.description;
+            if (!desc || desc === "None") desc = "";
+            document.getElementById('edit_description').value = desc;
+
+            document.getElementById('edit_recurrence').value = event.recurrence_type || "yearly";
+        }
+
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        async function updateEvent() {
+            const id = document.getElementById('edit_event_id').value;
+            const name = document.getElementById('edit_name').value;
+            const desc = document.getElementById('edit_description').value;
+            const rec = document.getElementById('edit_recurrence').value;
+
+            try {
+                const resp = await fetch(`/events/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: name,
+                        description: desc,
+                        recurrence_type: rec
+                    })
+                });
+                if (resp.ok) location.reload();
+                else alert("Update failed");
+            } catch (e) { console.error(e); alert("Error updating"); }
+        }
+
+        async function deleteEvent() {
+            if (!confirm("Are you sure you want to delete this event?")) return;
+            const id = document.getElementById('edit_event_id').value;
+            try {
+                const resp = await fetch(`/events/${id}`, {
+                    method: 'DELETE'
+                });
+                if (resp.ok) location.reload();
+                else alert("Delete failed");
+            } catch (e) { console.error(e); alert("Error deleting"); }
+        }
+
+        async function saveNewEvent(event) {
+            if (event) event.preventDefault();
+            try {
+                const params = new URLSearchParams();
+                params.append('name', document.getElementById('add_name').value);
+                params.append('tithi', document.getElementById('add_tithi').value);
+                params.append('masa', document.getElementById('add_masa').value);
+                params.append('paksha', document.getElementById('add_paksha').value);
+                params.append('recurrence_type', document.getElementById('add_recurrence').value);
+                params.append('description', document.getElementById('add_description').value);
+
+                const resp = await fetch('/events/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: params
+                });
+
+                if (resp.ok) location.reload();
+                else {
+                    const txt = await resp.text();
+                    console.error("Save failed:", txt);
+                    alert("Failed to save event. Server says: " + txt);
+                }
+            } catch (error) {
+                console.error("Fetch error:", error);
+                alert("Error saving event: " + error.message);
+            }
+        }
+
+        window.onclick = function (event) {
+            if (event.target.classList.contains('modal')) event.target.style.display = "none";
+            if (document.getElementById('notif-dropdown') && !document.getElementById('notif-bell').contains(event.target)) {
+                document.getElementById('notif-dropdown').style.display = 'none';
+            }
+        }
+
+        // Notification Logic
+        const bell = document.getElementById('notif-bell');
+        const badge = document.getElementById('notif-badge');
+        const list = document.getElementById('notif-list');
+        const dropdown = document.getElementById('notif-dropdown');
+        let isDropdownOpen = false;
+
+        async function fetchNotifications() {
+            if (!bell) return;
+            try {
+                const response = await fetch('/notifications/');
+                if (response.ok) {
+                    const notifs = await response.json();
+                    updateNotificationUI(notifs);
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function updateNotificationUI(notifs) {
+            if (!badge || !list) return;
+            const unread = notifs.filter(n => !n.is_read).length;
+            if (unread > 0) { badge.innerText = unread; badge.style.display = 'block'; }
+            else { badge.style.display = 'none'; }
+
+            list.innerHTML = '';
+            if (notifs.length === 0) list.innerHTML = '<li class="notif-item">No notifications</li>';
+            else {
+                notifs.forEach(n => {
+                    const li = document.createElement('li');
+                    li.className = `notif-item ${n.is_read ? '' : 'unread'}`;
+                    li.innerText = n.message;
+                    li.onclick = async () => {
+                        await fetch(`/notifications/${n.id}/read`, { method: 'POST' });
+                        fetchNotifications();
+                    };
+                    list.appendChild(li);
+                });
+            }
+        }
+
+        function toggleNotifications() {
+            isDropdownOpen = !isDropdownOpen;
+            if (dropdown) dropdown.style.display = isDropdownOpen ? 'block' : 'none';
+            if (isDropdownOpen) fetchNotifications();
+        }
+
+        if (bell) { fetchNotifications(); setInterval(fetchNotifications, 60000); }
+
+        renderCalendar();
+    </script>
+</body>
+
+</html>
