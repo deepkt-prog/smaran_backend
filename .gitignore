@@ -1,0 +1,6 @@
+venv/
+__pycache__/
+*.pyc
+smaran.db
+smaran-mobile/
+.env
