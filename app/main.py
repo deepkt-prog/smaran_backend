@@ -14,6 +14,15 @@ from .i18n import get_translations_for_lang
 
 app = FastAPI(title="Smaran")
 
+from fastapi.responses import HTMLResponse, JSONResponse
+import traceback
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    return HTMLResponse(
+        status_code=500,
+        content=f"<h3>Internal Server Error</h3><pre>{traceback.format_exc()}</pre>"
+    )
 from starlette.middleware.sessions import SessionMiddleware
 from .config import SECRET_KEY
 
