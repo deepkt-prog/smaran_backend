@@ -9,8 +9,8 @@ from fastapi import Depends
 from sqlalchemy.orm import Session
 import os
 from .i18n import get_translations_for_lang
-# Create tables
-Base.metadata.create_all(bind=engine)
+# Create tables (Handled manually via setup_db.py now)
+# Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Smaran")
 
