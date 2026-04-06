@@ -34,9 +34,15 @@ def get_db():
         db.close()
 
 def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
+    try:
+        return pwd_context.verify(plain_password, hashed_password)
+    except ValueError:
+        return False
 
 def get_password_hash(password):
+    # Bcrypt restricts passwords to 72 bytes. Truncate safely.
+    if len(password.encode('utf-8')) > 72:
+        password = password.encode('utf-8')[:72].decode('utf-8', 'ignore')
     return pwd_context.hash(password)
 
 @router.get("/signup", response_class=HTMLResponse)
