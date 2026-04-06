@@ -41,7 +41,7 @@ def get_password_hash(password):
 
 @router.get("/signup", response_class=HTMLResponse)
 async def signup_page(request: Request):
-    return templates.TemplateResponse("signup.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="signup.html", context={"request": request})
 
 @router.post("/signup")
 async def signup(
@@ -56,7 +56,7 @@ async def signup(
 ):
     user = db.query(models.User).filter(models.User.email == email).first()
     if user:
-        return templates.TemplateResponse("signup.html", {"request": request, "error": "Email already registered"})
+        return templates.TemplateResponse(request=request, name="signup.html", context={"request": request, "error": "Email already registered"})
     
     hashed_password = get_password_hash(password)
     new_user = models.User(
@@ -77,7 +77,7 @@ async def signup(
 
 @router.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="login.html", context={"request": request})
 
 @router.post("/login")
 async def login(
@@ -88,7 +88,7 @@ async def login(
 ):
     user = db.query(models.User).filter(models.User.email == email).first()
     if not user or not verify_password(password, user.hashed_password):
-        return templates.TemplateResponse("login.html", {"request": request, "error": "Invalid credentials"})
+        return templates.TemplateResponse(request=request, name="login.html", context={"request": request, "error": "Invalid credentials"})
     
     import datetime
     user.last_login = datetime.datetime.utcnow()
@@ -200,7 +200,7 @@ async def google_auth(request: Request, db: Session = Depends(get_db)):
         token = await oauth.google.authorize_access_token(request)
     except Exception as e:
         # This usually happens if user cancels or config is wrong
-        return templates.TemplateResponse("login.html", {"request": request, "error": f"Google Login Failed: {str(e)}"})
+        return templates.TemplateResponse(request=request, name="login.html", context={"request": request, "error": f"Google Login Failed: {str(e)}"})
         
     user_info = token.get('userinfo')
     if not user_info:
@@ -211,7 +211,7 @@ async def google_auth(request: Request, db: Session = Depends(get_db)):
     name = user_info.get("name")
     
     if not email:
-        return templates.TemplateResponse("login.html", {"request": request, "error": "Could not get email from Google."})
+        return templates.TemplateResponse(request=request, name="login.html", context={"request": request, "error": "Could not get email from Google."})
 
     # Check if user exists
     user = db.query(models.User).filter(models.User.email == email).first()
@@ -260,7 +260,7 @@ async def google_auth(request: Request, db: Session = Depends(get_db)):
 
 @router.get("/profile", response_class=HTMLResponse)
 async def profile_page(request: Request, current_user = Depends(get_current_user)):
-    return templates.TemplateResponse("profile.html", {"request": request, "user": current_user})
+    return templates.TemplateResponse(request=request, name="profile.html", context={"request": request, "user": current_user})
 
 @router.post("/profile")
 async def update_profile(
@@ -280,7 +280,7 @@ async def update_profile(
             db.add(user_in_db)
             db.commit()
             db.refresh(user_in_db)
-            return templates.TemplateResponse("profile.html", {
+            return templates.TemplateResponse(request=request, name="profile.html", context={
                 "request": request, 
                 "user": user_in_db, 
                 "message": "Profile updated successfully!"
@@ -288,7 +288,7 @@ async def update_profile(
             
         elif action == "update_password":
             if not password or len(password) < 6:
-                return templates.TemplateResponse("profile.html", {
+                return templates.TemplateResponse(request=request, name="profile.html", context={
                     "request": request, 
                     "user": current_user, 
                     "error": "Password must be at least 6 characters."
@@ -298,14 +298,14 @@ async def update_profile(
             user_in_db.hashed_password = get_password_hash(password)
             db.add(user_in_db)
             db.commit()
-            return templates.TemplateResponse("profile.html", {
+            return templates.TemplateResponse(request=request, name="profile.html", context={
                 "request": request, 
                 "user": user_in_db, 
                 "message": "Password changed successfully!"
             })
             
     except Exception as e:
-        return templates.TemplateResponse("profile.html", {
+        return templates.TemplateResponse(request=request, name="profile.html", context={
             "request": request, 
             "user": current_user, 
             "error": f"An error occurred: {str(e)}"
@@ -327,7 +327,7 @@ async def create_family(
     import string
     
     if current_user.family_id:
-        return templates.TemplateResponse("profile.html", {
+        return templates.TemplateResponse(request=request, name="profile.html", context={
             "request": request, 
             "user": current_user, 
             "error": "You are already in a family. Leave it first to create a new one."
@@ -351,7 +351,7 @@ async def create_family(
     user_in_db.family_id = new_family.id
     db.commit()
     
-    return templates.TemplateResponse("profile.html", {
+    return templates.TemplateResponse(request=request, name="profile.html", context={
         "request": request, 
         "user": user_in_db, 
         "message": f"Family '{family_name}' created! Invite Code: {invite_code}"
@@ -365,7 +365,7 @@ async def join_family(
     current_user = Depends(get_current_user)
 ):
     if current_user.family_id:
-        return templates.TemplateResponse("profile.html", {
+        return templates.TemplateResponse(request=request, name="profile.html", context={
             "request": request, 
             "user": current_user, 
             "error": "You are already in a family."
@@ -374,7 +374,7 @@ async def join_family(
     family = db.query(models.Family).filter(models.Family.invite_code == invite_code.upper()).first()
     
     if not family:
-        return templates.TemplateResponse("profile.html", {
+        return templates.TemplateResponse(request=request, name="profile.html", context={
             "request": request, 
             "user": current_user, 
             "error": "Invalid Invite Code."
@@ -384,7 +384,7 @@ async def join_family(
     user_in_db.family_id = family.id
     db.commit()
     
-    return templates.TemplateResponse("profile.html", {
+    return templates.TemplateResponse(request=request, name="profile.html", context={
         "request": request, 
         "user": user_in_db, 
         "message": f"Joined '{family.name}' successfully!"

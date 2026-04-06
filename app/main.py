@@ -128,7 +128,7 @@ async def read_root(
         # Sort upcoming by date
         upcoming_events.sort(key=lambda x: x.next_date)
         
-    return templates.TemplateResponse("index.html", {
+    return templates.TemplateResponse(request=request, name="index.html", context={
         "request": request, 
         "title": "Smaran", 
         "user": current_user,
@@ -219,7 +219,7 @@ async def read_calendar(
         lang_code = "en"
     t = get_translations_for_lang(lang_code)
 
-    return templates.TemplateResponse("calendar.html", {
+    return templates.TemplateResponse(request=request, name="calendar.html", context={
         "request": request, 
         "user": current_user,
         "events": events_list,
