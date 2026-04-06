@@ -221,3 +221,13 @@ async def read_calendar(
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
+
+@app.get("/init-db")
+def init_db():
+    try:
+        from .database import engine, Base
+        import app.models # make sure models are loaded
+        Base.metadata.create_all(bind=engine)
+        return {"status": "success", "message": "Database tables created successfully!"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
